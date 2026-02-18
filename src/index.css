@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+/* React Flow base styles */
+@import "@xyflow/react/dist/style.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+}
+
+/* ──── React Flow overrides ──── */
+.react-flow__renderer {
+  background: transparent;
+}
+
+.react-flow__background {
+  background: transparent;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__handle {
+  transition: all 0.15s ease;
+}
+
+.react-flow__handle:hover {
+  transform: scale(1.4);
+}
+
+/* ──── Top-level edge color ──── */
+.edge-top .react-flow__edge-path {
+  stroke: #6366f1;
+  filter: drop-shadow(0 0 4px #6366f1aa);
+}
+
+/* ──── Mid-level edge color ──── */
+.edge-mid .react-flow__edge-path {
+  stroke: #10b981;
+  filter: drop-shadow(0 0 4px #10b981aa);
+}
+
+/* ──── Bottom-level edge color ──── */
+.edge-bot .react-flow__edge-path {
+  stroke: #f59e0b;
+  filter: drop-shadow(0 0 4px #f59e0baa);
+}
+
+/* ──── Drag preview ghost ──── */
+.drag-ghost {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ──── Scrollbar ──── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1e2130;
+}
+::-webkit-scrollbar-thumb {
+  background: #3b4263;
+  border-radius: 3px;
+}
+
+/* ──── Animated glow for selected nodes ──── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(99,102,241,0.4); }
+  50%       { box-shadow: 0 0 18px 5px rgba(99,102,241,0.7); }
+}
+
+.node-selected {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ──── NodeResizer handle & line polish ──── */
+.react-flow__resize-control.handle {
+  border-radius: 4px !important;
+  background: #0d0f1a !important;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.react-flow__resize-control.handle:hover {
+  transform: scale(1.4);
+}
+
+.react-flow__resize-control.line {
+  border-style: dashed !important;
+  opacity: 0.5;
+}
