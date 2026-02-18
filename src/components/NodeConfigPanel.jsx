@@ -46,7 +46,7 @@ export default function NodeConfigPanel() {
   const { selectedNode, updateNodeData, deleteNode, drillInto, toggleActive, toggleRequired, findNodeById } = useFlowStore()
 
   const [form, setForm] = useState({
-    label: '', description: '', color: '', logicNote: '', status: 'default',
+    label: '', description: '', color: '', logicNote: '', status: 'default', gateType: 'AND',
   })
 
   useEffect(() => {
@@ -57,6 +57,7 @@ export default function NodeConfigPanel() {
         color: selectedNode.data.color || LEVELS[selectedNode.data.level]?.color || '#6366f1',
         logicNote: selectedNode.data.logicNote || '',
         status: selectedNode.data.status || 'default',
+        gateType: selectedNode.data.gateType || 'AND',
       })
     }
   }, [selectedNode])
@@ -182,6 +183,35 @@ export default function NodeConfigPanel() {
             activeColor="#f59e0b"
             label="Required (for parent)"
           />
+
+          {/* Gate Type selector (top/mid only) */}
+          {level !== 'bot' && (
+            <div>
+              <div className="text-xs text-slate-400 mb-2">Gate Type</div>
+              <div className="flex gap-2">
+                {[
+                  { type: 'AND', symbol: '∧', desc: 'All required children must be active' },
+                  { type: 'OR', symbol: '∨', desc: 'At least one required child must be active' },
+                  { type: 'NAND', symbol: '⊼', desc: 'Not all required children can be active' },
+                ].map(({ type, symbol, desc }) => (
+                  <button
+                    key={type}
+                    onClick={() => handleChange('gateType', type)}
+                    title={desc}
+                    className="flex-1 px-3 py-2 rounded-lg text-sm font-bold transition-all hover:brightness-110 active:scale-95"
+                    style={{
+                      background: form.gateType === type ? `${accentColor}33` : '#2a2d40',
+                      color: form.gateType === type ? accentColor : '#888',
+                      border: `1px solid ${form.gateType === type ? accentColor + '55' : '#3b4263'}`,
+                    }}
+                  >
+                    <div className="text-lg leading-none mb-1">{symbol}</div>
+                    <div className="text-xs">{type}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Effective state explanation */}
           {!effectiveActive && manualActive && (

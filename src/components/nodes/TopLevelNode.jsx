@@ -64,6 +64,18 @@ const TopLevelNode = memo(({ id, data, selected }) => {
           TOP LEVEL
         </span>
 
+        {/* Gate badge */}
+        <div
+          className="text-xs px-1.5 py-0.5 rounded font-bold"
+          style={{
+            background: dimmed ? '#333' : accentColor + '33',
+            color: dimmed ? '#777' : accentColor,
+            border: `1px solid ${dimmed ? '#444' : accentColor + '55'}`,
+          }}
+        >
+          {data.gateType === 'OR' ? '∨' : data.gateType === 'NAND' ? '⊼' : '∧'}
+        </div>
+
         {/* Active/Inactive toggle */}
         <button
           onClick={handleToggleActive}

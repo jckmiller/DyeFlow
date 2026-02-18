@@ -104,12 +104,39 @@ export default function NodeCanvas() {
     [activeMap, levelMeta.color]
   )
 
+  const isDrilledIn = navStack.length > 1
+  const parentNav = navStack[navStack.length - 2]
+
+  const handleBack = () => {
+    if (isDrilledIn) navigateTo(navStack.length - 2)
+  }
+
   return (
     <div
       ref={reactFlowWrapper}
-      className="w-full h-full"
+      className="w-full h-full relative"
       style={{ background: levelMeta.bgDark }}
     >
+      {/* Floating back button */}
+      {isDrilledIn && (
+        <button
+          onClick={handleBack}
+          className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:brightness-125 active:scale-95 shadow-lg"
+          style={{
+            background: '#1a1d2e',
+            color: '#64748b',
+            border: '1px solid #2a2d40',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+          }}
+          title={`Back to ${parentNav.label}`}
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to {parentNav.label}
+        </button>
+      )}
+
       <ReactFlow
         nodes={nodes}
         edges={enrichedEdges}

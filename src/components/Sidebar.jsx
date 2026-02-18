@@ -50,20 +50,20 @@ function NodeTemplate({ level, label, description, color, icon }) {
 
 // ── Templates per level ───────────────────────────────────────────────────────
 const TOP_TEMPLATES = [
-  { label: 'Receiving', description: 'Inbound goods', icon: '📥' },
-  { label: 'Quality Control', description: 'Inspect & verify', icon: '🔍' },
+  { label: 'Receiving', description: 'Inbound goods processing', icon: '📥' },
+  { label: 'Inspection', description: 'Visual and functional checks', icon: '🔍' },
+  { label: 'Pre-Audit', description: 'Preliminary documentation review', icon: '📋' },
+  { label: 'Audit', description: 'Detailed compliance verification', icon: '✅' },
+  { label: 'Packing', description: 'Prepare items for shipment', icon: '📦' },
   { label: 'Shipping', description: 'Outbound dispatch', icon: '📤' },
-  { label: 'Inventory', description: 'Stock management', icon: '📦' },
-  { label: 'Returns', description: 'Process returns', icon: '↩️' },
-  { label: 'Staging', description: 'Pre-processing area', icon: '🏗️' },
 ]
 
 const MID_TEMPLATES = [
-  { label: 'Scan NSN', description: 'Scan stock number', icon: '🔢' },
-  { label: 'Verify Quantity', description: 'Count items', icon: '🔢' },
+  { label: 'Scan', description: 'Scan item identifiers', icon: '📱' },
+  { label: 'Verify', description: 'Validate item details', icon: '🔍' },
+  { label: 'Record', description: 'Log transaction in system', icon: '📝' },
   { label: 'Label Item', description: 'Apply labels', icon: '🏷️' },
   { label: 'Route Item', description: 'Direct to location', icon: '🔀' },
-  { label: 'Log Entry', description: 'Record in system', icon: '📝' },
   { label: 'Notify Team', description: 'Send alert', icon: '🔔' },
 ]
 
@@ -77,7 +77,7 @@ const BOT_TEMPLATES = [
 ]
 
 export default function Sidebar() {
-  const { navStack, exportFlow, importFlow } = useFlowStore()
+  const { navStack, topNodes, drillInto, exportFlow, importFlow } = useFlowStore()
   const nav = navStack[navStack.length - 1]
   const currentLevel = nav.level
   const levelMeta = LEVELS[currentLevel]
@@ -140,7 +140,7 @@ export default function Sidebar() {
           className="flex gap-1 p-1.5 rounded-xl"
           style={{ background: '#1a1d2e' }}
         >
-          {['nodes', 'tools'].map((t) => (
+          {['nodes', 'navigate', 'tools'].map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
@@ -155,7 +155,7 @@ export default function Sidebar() {
                   : {}
               }
             >
-              {t === 'nodes' ? '🧩 Nodes' : '🛠 Tools'}
+              {t === 'nodes' ? '🧩 Nodes' : t === 'navigate' ? '🧭 Navigate' : '🛠 Tools'}
             </button>
           ))}
         </div>
@@ -257,6 +257,64 @@ export default function Sidebar() {
               </div>
             </section>
           </>
+        )}
+
+        {activeTab === 'navigate' && (
+          <div className="space-y-4">
+            {/* Navigation Tree */}
+            <div
+              className="rounded-xl p-4 space-y-3"
+              style={{ background: '#1a1d2e', border: '1px solid #2a2d40' }}
+            >
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Jump to Canvas
+              </div>
+              <div className="space-y-2">
+                {topNodes.map((topNode) => (
+                  <div key={topNode.id} className="space-y-1">
+                    {/* Top Node */}
+                    <button
+                      onClick={() => drillInto(topNode.id)}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all hover:brightness-110 active:scale-95"
+                      style={{
+                        background: `${LEVELS.top.color}22`,
+                        color: LEVELS.top.color,
+                        border: `1px solid ${LEVELS.top.color}44`,
+                      }}
+                      title={`Open ${topNode.data.label} mid-level canvas`}
+                    >
+                      <div
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ background: LEVELS.top.color }}
+                      />
+                      <span className="text-xs font-semibold truncate">{topNode.data.label}</span>
+                    </button>
+
+                    {/* Mid Nodes */}
+                    {topNode.data.childNodes?.map((midNode) => (
+                      <button
+                        key={midNode.id}
+                        onClick={() => drillInto(midNode.id)}
+                        className="w-full flex items-center gap-2 px-3 py-1.5 ml-4 rounded-lg text-left transition-all hover:brightness-110 active:scale-95"
+                        style={{
+                          background: `${LEVELS.mid.color}15`,
+                          color: LEVELS.mid.color,
+                          border: `1px solid ${LEVELS.mid.color}33`,
+                        }}
+                        title={`Open ${midNode.data.label} bottom-level canvas`}
+                      >
+                        <div
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: LEVELS.mid.color }}
+                        />
+                        <span className="text-xs truncate">{midNode.data.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
 
         {activeTab === 'tools' && (

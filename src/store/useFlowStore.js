@@ -39,14 +39,19 @@ export const LEVELS = {
 // ─── Compute effective active state for a node ────────────────────────────────
 // A node is "effectively active" if:
 //   - It is manually active (isActive !== false)
-//   - AND all of its REQUIRED children are also effectively active
+//   - AND its gate logic (AND/OR/NAND) is satisfied by its REQUIRED children
 export function computeEffectiveActive(node) {
   if (node.data.isActive === false) return false
   const children = node.data.childNodes || []
   if (!children.length) return true
-  // If any required child is effectively inactive → this node is inactive
   const requiredChildren = children.filter((c) => c.data.isRequired === true)
-  return requiredChildren.every((c) => computeEffectiveActive(c))
+  if (!requiredChildren.length) return true
+
+  const gate = node.data.gateType || 'AND'
+  if (gate === 'AND') return requiredChildren.every((c) => computeEffectiveActive(c))
+  if (gate === 'OR') return requiredChildren.some((c) => computeEffectiveActive(c))
+  if (gate === 'NAND') return !requiredChildren.every((c) => computeEffectiveActive(c))
+  return true // fallback
 }
 
 // ─── Default starter data ─────────────────────────────────────────────────────
@@ -62,29 +67,79 @@ const makeDefaultTopNodes = () => [
       level: 'top',
       isActive: true,
       isRequired: false,
+      gateType: 'AND',
       childNodes: makeDefaultMidNodes('top-1'),
-      childEdges: [],
+      childEdges: makeDefaultMidEdges('top-1'),
     },
   },
   {
     id: 'top-2',
     type: 'topNode',
-    position: { x: 420, y: 120 },
+    position: { x: 380, y: 120 },
     data: {
-      label: 'Quality Control',
-      description: 'Inspect and verify items',
+      label: 'Inspection',
+      description: 'Visual and functional checks',
       color: '#6366f1',
       level: 'top',
       isActive: true,
       isRequired: false,
-      childNodes: [],
-      childEdges: [],
+      gateType: 'AND',
+      childNodes: makeDefaultMidNodes('top-2'),
+      childEdges: makeDefaultMidEdges('top-2'),
     },
   },
   {
     id: 'top-3',
     type: 'topNode',
-    position: { x: 760, y: 120 },
+    position: { x: 680, y: 120 },
+    data: {
+      label: 'Pre-Audit',
+      description: 'Preliminary documentation review',
+      color: '#6366f1',
+      level: 'top',
+      isActive: true,
+      isRequired: false,
+      gateType: 'AND',
+      childNodes: makeDefaultMidNodes('top-3'),
+      childEdges: makeDefaultMidEdges('top-3'),
+    },
+  },
+  {
+    id: 'top-4',
+    type: 'topNode',
+    position: { x: 980, y: 120 },
+    data: {
+      label: 'Audit',
+      description: 'Detailed compliance verification',
+      color: '#6366f1',
+      level: 'top',
+      isActive: true,
+      isRequired: false,
+      gateType: 'AND',
+      childNodes: makeDefaultMidNodes('top-4'),
+      childEdges: makeDefaultMidEdges('top-4'),
+    },
+  },
+  {
+    id: 'top-5',
+    type: 'topNode',
+    position: { x: 1280, y: 120 },
+    data: {
+      label: 'Packing',
+      description: 'Prepare items for shipment',
+      color: '#6366f1',
+      level: 'top',
+      isActive: true,
+      isRequired: false,
+      gateType: 'AND',
+      childNodes: makeDefaultMidNodes('top-5'),
+      childEdges: makeDefaultMidEdges('top-5'),
+    },
+  },
+  {
+    id: 'top-6',
+    type: 'topNode',
+    position: { x: 1580, y: 120 },
     data: {
       label: 'Shipping',
       description: 'Outbound dispatch',
@@ -92,8 +147,9 @@ const makeDefaultTopNodes = () => [
       level: 'top',
       isActive: true,
       isRequired: false,
-      childNodes: [],
-      childEdges: [],
+      gateType: 'AND',
+      childNodes: makeDefaultMidNodes('top-6'),
+      childEdges: makeDefaultMidEdges('top-6'),
     },
   },
 ]
@@ -104,32 +160,72 @@ const makeDefaultMidNodes = (parentId) => [
     type: 'midNode',
     position: { x: 80, y: 100 },
     data: {
-      label: 'Scan NSN',
-      description: 'Scan the National Stock Number',
+      label: 'Scan',
+      description: 'Scan item identifiers',
       color: '#10b981',
       level: 'mid',
       parentId,
       isActive: true,
       isRequired: true,
+      gateType: 'AND',
       childNodes: makeDefaultBotNodes(`mid-${parentId}-1`),
-      childEdges: [],
+      childEdges: makeDefaultBotEdges(`mid-${parentId}-1`),
     },
   },
   {
     id: `mid-${parentId}-2`,
     type: 'midNode',
-    position: { x: 420, y: 100 },
+    position: { x: 380, y: 100 },
     data: {
-      label: 'Verify Quantity',
-      description: 'Count and verify item quantities',
+      label: 'Verify',
+      description: 'Validate item details',
       color: '#10b981',
       level: 'mid',
       parentId,
       isActive: true,
-      isRequired: false,
+      isRequired: true,
+      gateType: 'AND',
       childNodes: [],
       childEdges: [],
     },
+  },
+  {
+    id: `mid-${parentId}-3`,
+    type: 'midNode',
+    position: { x: 680, y: 100 },
+    data: {
+      label: 'Record',
+      description: 'Log transaction in system',
+      color: '#10b981',
+      level: 'mid',
+      parentId,
+      isActive: true,
+      isRequired: true,
+      gateType: 'AND',
+      childNodes: [],
+      childEdges: [],
+    },
+  },
+]
+
+const makeDefaultMidEdges = (parentId) => [
+  {
+    id: `e-mid-${parentId}-1-2`,
+    source: `mid-${parentId}-1`,
+    target: `mid-${parentId}-2`,
+    className: 'edge-mid',
+    animated: true,
+    label: '',
+    data: { level: 'mid' },
+  },
+  {
+    id: `e-mid-${parentId}-2-3`,
+    source: `mid-${parentId}-2`,
+    target: `mid-${parentId}-3`,
+    className: 'edge-mid',
+    animated: true,
+    label: '',
+    data: { level: 'mid' },
   },
 ]
 
@@ -168,6 +264,18 @@ const makeDefaultBotNodes = (parentId) => [
   },
 ]
 
+const makeDefaultBotEdges = (parentId) => [
+  {
+    id: `e-bot-${parentId}-1-2`,
+    source: `bot-${parentId}-1`,
+    target: `bot-${parentId}-2`,
+    className: 'edge-bot',
+    animated: true,
+    label: '',
+    data: { level: 'bot' },
+  },
+]
+
 // ─── Store ────────────────────────────────────────────────────────────────────
 const useFlowStore = create((set, get) => ({
   // Navigation stack: array of { level, parentNodeId, label }
@@ -189,6 +297,33 @@ const useFlowStore = create((set, get) => ({
       id: 'e-top-2-3',
       source: 'top-2',
       target: 'top-3',
+      className: 'edge-top',
+      animated: true,
+      label: '',
+      data: { level: 'top' },
+    },
+    {
+      id: 'e-top-3-4',
+      source: 'top-3',
+      target: 'top-4',
+      className: 'edge-top',
+      animated: true,
+      label: '',
+      data: { level: 'top' },
+    },
+    {
+      id: 'e-top-4-5',
+      source: 'top-4',
+      target: 'top-5',
+      className: 'edge-top',
+      animated: true,
+      label: '',
+      data: { level: 'top' },
+    },
+    {
+      id: 'e-top-5-6',
+      source: 'top-5',
+      target: 'top-6',
       className: 'edge-top',
       animated: true,
       label: '',
@@ -344,6 +479,7 @@ const useFlowStore = create((set, get) => ({
         parentId: nav.parentNodeId || null,
         isActive: true,
         isRequired: false,
+        gateType: level === 'bot' ? undefined : 'AND',
         childNodes: [],
         childEdges: [],
       },
